@@ -1,0 +1,38 @@
+version: '3'
+
+networks:
+    intermed-network:
+      external: true
+
+services:
+  intermed:
+    hostname: intermed.localhost
+    build: ./
+    working_dir: /usr/src/project
+    volumes:
+        - ./project/:/usr/src/project
+    command: >
+        bash -c "
+            python manage.py runserver intermed.localhost:8000"
+    ports:
+        - "8000:8000"
+    environment:
+        - PYTHONUNBUFFERED=True
+        - OAUTHLIB_INSECURE_TRANSPORT=False
+        - DEBUG=true
+    env_file:
+        .env 
+    depends_on:
+        - mysql-intermed
+    networks:
+        - intermed-network
+    
+  mysql-intermed:
+    image: mysql:latest
+    container_name: mysql-intermed
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    networks:
+      - intermed-network
